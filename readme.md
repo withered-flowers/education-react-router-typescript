@@ -103,3 +103,194 @@ Namun hal ini sebisa mungkin, untuk hal hal yang sangat spesifik, harus dihindar
 Sekarang mari kita coba untuk mengekstrak halaman utama menjadi sebuah layout yah.
 
 ## Langkah 2 - Ekstrak Layout Utama
+
+Karena dalam setiap halaman yang ada di sini adalah memiliki sebuah NavigationBar (component `NavBar.tsx`), maka sekarang kita ingin ekstrak menjadi sebuah layout utama.
+
+Layout Utama ini adalah sebuah halaman yang memiliki sebuah NavBar yang akan berisi anakan (`outlet`) untuk konten yang ada, entah konten tersebut berupa `CounterPage`, `FormPage` maupun `TablePage`
+
+Asumsi untuk Routing yang akan didefinisikan adalah sebagai berikut:
+
+- `/counter` akan mengarahkan pada halaman `CounterPage` (_akan dibuat nanti_)
+- `/form` akan mengarahkan pada halaman `FormPage`
+- `/table` akan mengarahkan pada halaman `TablePage`
+
+Langkah langkahnya adalah sebagai berikut:
+
+1. Membuat sebuah file baru dengan nama `/src/layouts/BaseLayout.tsx`. Pada halaman ini kita akan memanfaatkan `Link` dan `Outlet` yang ada pada React Router.
+
+   Secara kasarnya `Link` adalah `anchor` yang berisi `href` menuju halaman yang sudah didefinisikan pada `routers/index.tsx` dan `Outlet` adalah `children` pada React.
+
+1. Memodifikasi kode pada `/src/components/NavBar.tsx` untuk menggunakan `Link`
+
+   ```ts
+   // TODO: baseLayout - Menggunakan Link (6)
+   // Ternyata, baik SyntheticEvent dan PageName sudah tidak digunakan lagi !
+   // import { SyntheticEvent } from "react";
+   // import { PageName } from "../config/constant";
+
+   // TODO: baseLayout - Menggunakan Link (1)
+   import { Link } from "react-router-dom";
+
+   // TODO: baseLayout - Menggunakan Link (2)
+   // Sekarang ini kita akan menggunakan navigate dari react-router-dom
+   // sehingga interface ini sudah tidak digunakan
+   // interface Props {
+   //   fnHandler: (pageName: PageName) => void;
+   // }
+
+   // TODO: baseLayout - Menggunakan Link (3)
+   // fnHandler sudah tidak digunakan, sehingga bisa kita kosongkan terlebih dahulu
+   const NavBar = () => {
+     // TODO: baseLayout - Menggunakan Link (4)
+     // Untuk sekarang ini dicomment terlebih dahulu, karena nanti kita
+     // akan ganti dengan navigate
+     // const anchorOnClickHandler = (event: SyntheticEvent, pageName: PageName) => {
+     //   event.preventDefault();
+     //   fnHandler(pageName);
+     // };
+
+     return (
+       <>
+         <nav>
+           <ul
+             style={{
+               display: "flex",
+               flexDirection: "row",
+               gap: "1em",
+               listStyle: "none",
+               paddingLeft: "0",
+             }}
+           >
+             <li>
+               {/* TODO: baseLayout - Menggunakan Link (5a) */}
+               {/* Mengganti anchor dengan Link */}
+               {/* asumsikan /counter ini sudah ada terlebih dahulu yah */}
+               {/* <a
+                  href="#"
+                  onClick={(e) => anchorOnClickHandler(e, PageName.COUNTER_PAGE)}
+                >
+                  Counter
+                </a> */}
+               <Link to="counter">Counter</Link>
+             </li>
+             <li>
+               {/* TODO: baseLayout - Menggunakan Link (5b) */}
+               {/* Mengganti anchor dengan Link */}
+               {/* asumsikan /form ini sudah ada terlebih dahulu yah */}
+               {/* <a
+                  href="#"
+                  onClick={(e) => anchorOnClickHandler(e, PageName.FORM_PAGE)}
+                >
+                  Form
+                </a> */}
+               <Link to="form">Form</Link>
+             </li>
+             <li>
+               {/* <a
+                  href="#"
+                  onClick={(e) => anchorOnClickHandler(e, PageName.TABLE_PAGE)}
+                >
+                  Table
+                </a> */}
+               {/* TODO: baseLayout - Menggunakan Link (5c) */}
+               {/* Mengganti anchor dengan Link */}
+               {/* asumsikan /table ini sudah ada terlebih dahulu yah */}
+               <Link to="table">Table</Link>
+             </li>
+           </ul>
+         </nav>
+       </>
+     );
+   };
+
+   export default NavBar;
+   ```
+
+   Ketika file ini selesai diketik dan di-save, maka akan muncul error pada file `App.tsx`, hal ini karena `App.tsx` masih menggunakan NavBar yang memiliki Props dan akan langsung muncul error (_menakjubkan yah?_, kalau dengan javascript pasti akan diabaikan saja !)
+
+   Untuk error ini sementara akan diabaikan terlebih dahulu yah karena kita akan memperbaikinya nanti !
+
+1. Selanjutnya kita akan memodifikasi file `/src/BaseLayout.tsx` untuk menggunakan `NavBar` yang sudah dimodikasi dan menggunakan `Outlet`. Adapun kodenya adalah sebagai berikut:
+
+   ```tsx
+   import { Outlet } from "react-router-dom";
+   import NavBar from "../components/NavBar";
+
+   const BaseLayout = () => {
+     return (
+       <>
+         <NavBar />
+         <Outlet />
+       </>
+     );
+   };
+
+   export default BaseLayout;
+   ```
+
+1. Selanjutnya kita akan memodifikasi file `/src/routers/index.tsx` untuk bisa menggunakan `BaseLayout.tsx` yang sudah dibuat sebelumnya, serta menambahkan route untuk `/form` dan `/table`.
+
+   Adapun modifikasi kodenya adalah sebagai berikut:
+
+   ```tsx
+   import { createBrowserRouter } from "react-router-dom";
+   // baseLayout - Import Layout dan Pages (5)
+   // App sudah tidak digunakan di sini, sudah boleh di-comment
+   // import App from "../App";
+
+   // TODO: baseLayout - Import Layout dan Pages (1)
+   // Di sini kita masih belum menggunakan CounterPage yah !
+   import BaseLayout from "../layouts/BaseLayout";
+   import FormPage from "../pages/FormPage";
+   import TablePage from "../pages/TablePage";
+
+   // Karena ini akan di-infer (ditebak) secara otomatis, kita tidak perlu menuliskan tipe datanya
+
+   // Hanya saja sebagai info router tipe datanya adalah "Router" / "RemixRouter"
+   // https://reactrouter.com/en/main/routers/create-browser-router#type-declaration
+
+   // Kemudian, untuk setiap Object yang didefinisikan di dalam array createBrowserRouter
+   // tipe datanya bernama "RouteObject"
+   // https://reactrouter.com/en/main/route/route#type-declaration
+   const router = createBrowserRouter([
+     // TODO: baseLayout - Import Layout dan Pages (2)
+     // Karena di sini sudah tidak menggunakan App lagi, maka path ini akan kita comment
+     // {
+     //   path: "/",
+     //   element: <App />,
+     // },
+     // TODO: baseLayout - Import Layout dan Pages (3)
+     // Di sini kita akan menggunakan BaseLayout sebagai element utama,
+     // dilanjutkan untuk setiap path yang akan dideclare sebagai children
+     // sehingga element FormPage dan TablePage akan dibuat berdasarkan
+     // BaseLayout yang ada.
+
+     // (Ingat, pada BaseLayout ada Outlet untuk bisa menerima component children)
+     {
+       element: <BaseLayout />,
+       children: [
+         {
+           path: "form",
+           element: <FormPage />,
+         },
+         {
+           path: "table",
+           element: <TablePage />,
+         },
+       ],
+     },
+     // TODO: baseLayout - Import Layout dan Pages (4)
+     // Di sini kita menggunakan Catch All / Splats untuk menerima 404
+     // Splats / Catch All / Router 404
+     {
+       path: "*",
+       element: <h1>Not Found Oi !</h1>,
+     },
+   ]);
+
+   export default router;
+   ```
+
+Sampai pada langkah ini artinya kita sudah berhasil menggunakan `BaseLayout` dan sudah berhasil menambahkan route / endpoint `/form` dan `/table` pada aplikasi yang dibuat.
+
+Selanjutnya kita akan mengekstrak `CounterPage` dari `App.tsx` sehingga `App.tsx` bisa jadi tidak perlu digunakan lagi
