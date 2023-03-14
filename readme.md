@@ -6,7 +6,7 @@
 - Intro
 - [Let's Learn](#lets-learn)
   - [Langkah 1 - Instalasi dan Inisialisasi React Router pada Project](#langkah-1---instalasi-dan-inisialisasi-react-router-pada-project)
-  - Langkah 2
+  - [Langkah 2 - Ekstrak Layout Utama](#langkah-2---ekstrak-layout-utama)
 
 ## Disclaimer & Prerequisites
 
@@ -89,3 +89,17 @@ Pada pembelajaran kali ini, kita akan mencoba untuk menggunakan React Router ver
      </React.StrictMode>
    );
    ```
+
+Sampai pada tahapan ini artinya route pertama kita sudah berjalan dengan baik, dan apabila kita melihat kodenya, tidak ada yang berbeda dengan kita menggunakan React Router versi JavaScript bukan?
+
+Ya ! karena dalam TypeScript, terdapat suatu fitur yang bernama `infer`. Jadi TypeScript secara otomatis, bisa menebak tipe data yang harus digunakan oleh sebuah variabel tersebut, berdasarkan fungsi / value yang digunakan / di-assign terhadap variabel tersebut.
+
+_Keren yah ?_
+
+Namun hal ini sebisa mungkin, untuk hal hal yang sangat spesifik, harus dihindari, karena bisa saja, TypeScript salah untuk meng-`infer` tipe data yang digunakan pada variabel tersebut, dan hanya menjadikannya sebagai `any` saja.
+
+(`any` artinya mirip dengan javascript, apapun bisa masuk sebagai variabelnya)
+
+Sekarang mari kita coba untuk mengekstrak halaman utama menjadi sebuah layout yah.
+
+## Langkah 2 - Ekstrak Layout Utama
