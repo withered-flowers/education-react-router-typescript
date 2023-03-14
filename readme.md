@@ -7,6 +7,7 @@
 - [Let's Learn](#lets-learn)
   - [Langkah 1 - Instalasi dan Inisialisasi React Router pada Project](#langkah-1---instalasi-dan-inisialisasi-react-router-pada-project)
   - [Langkah 2 - Ekstrak Layout Utama](#langkah-2---ekstrak-layout-utama)
+  - [Langkah 3 - Membuat Counter Page](#langkah-3---membuat-counter-page)
 
 ## Disclaimer & Prerequisites
 
@@ -294,3 +295,178 @@ Langkah langkahnya adalah sebagai berikut:
 Sampai pada langkah ini artinya kita sudah berhasil menggunakan `BaseLayout` dan sudah berhasil menambahkan route / endpoint `/form` dan `/table` pada aplikasi yang dibuat.
 
 Selanjutnya kita akan mengekstrak `CounterPage` dari `App.tsx` sehingga `App.tsx` bisa jadi tidak perlu digunakan lagi
+
+## Langkah 3 - Membuat Counter Page
+
+Selanjutnya kita akan membuat `CounterPage` berdasarkan `App.tsx` yang sudah dibuat.
+
+Hal ini akan kita lakukan karena pada akhirnya, kita sudah tidak akan menggunakan `App.tsx` lagi (full on `pages`).
+
+Langkah dalam membuat Counter Page adalah sebagai berikut:
+
+1. Membuat sebuah pages dengan nama `/src/pages/CounterPage.tsx`
+1. Mengambil kode dari `App.tsx` dan memodifikasinya, dan memasukkannya ke `CounterPage.tsx`. Adapun kode yang dimasukkan ke dalam `CounterPage.tsx` adalah sebagai berikut:
+
+   ```tsx
+   // counterPage - Create Counter Page (0)
+   // Memindahkan kode dari App.tsx ke sini
+
+   // Dengan sedikit modifikasi
+   // Karena:
+   // 1. Kita sudah tidak menggunakan enum (PageState)
+   // 2. Kita sudah tidak menggunakan Conditional Rendering, karena sudah menggunakan
+   //    konsep routing dari react router
+   import { ChangeEvent, useState } from "react";
+
+   type DuoCounter = {
+     firstCounter: number;
+     secondCounter: number;
+   };
+
+   const CounterPage = () => {
+     const [duoCounter, setDuoCounter] = useState<DuoCounter>({
+       firstCounter: 0,
+       secondCounter: 0,
+     });
+
+     const buttonFirstIncrementOnClickHandler = () => {
+       setDuoCounter({
+         ...duoCounter,
+         firstCounter: duoCounter.firstCounter + 1,
+       });
+     };
+
+     const [amount, setAmount] = useState<number>(0);
+
+     const inputAmountOnChangeHandler = (
+       event: ChangeEvent<HTMLInputElement>
+     ) => {
+       const amountValue = event.currentTarget.value;
+       const amounValueInNumber = parseInt(amountValue);
+       setAmount(amounValueInNumber);
+     };
+
+     const buttonSecondIncrementOnClickHandler = () => {
+       setDuoCounter({
+         ...duoCounter,
+         secondCounter: duoCounter.secondCounter + amount,
+       });
+     };
+
+     return (
+       <>
+         <section className="Duo Counter">
+           <p>Value dari firstCounter adalah: {duoCounter.firstCounter}</p>
+           <p>Value dari secondCounter adalah: {duoCounter.secondCounter}</p>
+
+           <div style={{ marginBottom: "1em" }}>
+             <button onClick={buttonFirstIncrementOnClickHandler}>
+               Tambah (firstCounter)
+             </button>
+           </div>
+
+           <div>
+             <input
+               style={{ marginRight: "1em" }}
+               type="number"
+               placeholder="Amount"
+               value={amount}
+               onChange={inputAmountOnChangeHandler}
+             />
+
+             <button onClick={buttonSecondIncrementOnClickHandler}>
+               Tambah (secondCounter)
+             </button>
+           </div>
+         </section>
+       </>
+     );
+   };
+
+   export default CounterPage;
+   ```
+
+1. Selanjutnya kita akan memodifikasi `/src/routers/index.tsx` untuk menambahkan routing `/counter` dan menggunakan `CounterPage.tsx`. Adapun modifikasi kodenya adalah sebagai berikut:
+
+   ```tsx
+   import { createBrowserRouter } from "react-router-dom";
+   // baseLayout - Import Layout dan Pages (5)
+   // App sudah tidak digunakan di sini, sudah boleh di-comment
+   // import App from "../App";
+
+   // TODO: baseLayout - Import Layout dan Pages (1)
+   // Di sini kita masih belum menggunakan CounterPage yah !
+   import BaseLayout from "../layouts/BaseLayout";
+   import FormPage from "../pages/FormPage";
+   import TablePage from "../pages/TablePage";
+
+   // TODO: counterPage - Create Counter Page (1)
+   // Di sini kita akan import CounterPage yang barusan dibuat
+   import CounterPage from "../pages/CounterPage";
+
+   // Karena ini akan di-infer (ditebak) secara otomatis, kita tidak perlu menuliskan tipe datanya
+
+   // Hanya saja sebagai info router tipe datanya adalah "Router" / "RemixRouter"
+   // https://reactrouter.com/en/main/routers/create-browser-router#type-declaration
+
+   // Kemudian, untuk setiap Object yang didefinisikan di dalam array createBrowserRouter
+   // tipe datanya bernama "RouteObject"
+   // https://reactrouter.com/en/main/route/route#type-declaration
+   const router = createBrowserRouter([
+     // TODO: baseLayout - Import Layout dan Pages (2)
+     // Karena di sini sudah tidak menggunakan App lagi, maka path ini akan kita comment
+     // {
+     //   path: "/",
+     //   element: <App />,
+     // },
+     // TODO: baseLayout - Import Layout dan Pages (3)
+     // Di sini kita akan menggunakan BaseLayout sebagai element utama,
+     // dilanjutkan untuk setiap path yang akan dideclare sebagai children
+     // sehingga element FormPage dan TablePage akan dibuat berdasarkan
+     // BaseLayout yang ada.
+
+     // (Ingat, pada BaseLayout ada Outlet untuk bisa menerima component children)
+     {
+       element: <BaseLayout />,
+       children: [
+         {
+           path: "form",
+           element: <FormPage />,
+         },
+         {
+           path: "table",
+           element: <TablePage />,
+         },
+         // TODO: counterPage - Create Counter Page (2)
+         // Tambahkan path di sini
+         {
+           path: "counter",
+           element: <CounterPage />,
+         },
+       ],
+     },
+     // TODO: baseLayout - Import Layout dan Pages (4)
+     // Di sini kita menggunakan Catch All / Splats untuk menerima 404
+     // Splats / Catch All / Router 404
+     {
+       path: "*",
+       element: <h1>Not Found Oi !</h1>,
+     },
+   ]);
+
+   export default router;
+   ```
+
+1. Sampai pada tahap ini, artinya kita sudah boleh untuk menghapus file `App.tsx` karena sudah tidak digunakan lagi. Menakjubkan bukan? Ternyata React bisa dibuat tanpa `App.jsx` !
+
+Pada tahap ini artinya kita sudah berhasil untuk menggunakan React Router dan memecahnya menjadi 3 page:
+
+- `/counter` untuk `CounterPage.tsx`
+- `/form` untuk `FormPage.tsx`
+- `/table` untuk `TablePage.tsx`
+
+Dan apakah kalian sadar? Dari tadi, kita sudah menggunakan React Router, versi TypeScript, tapi, secara kode, kita tidak menuliskan sedikitpun kode TypeScriptnya sama sekali loh. (Tidak ada `Type`, tidak ada `Interface`, tidak ada `Enum` dan lain lain)
+
+Hal ini bisa dilakukan karena sekali lagi, TypeScript bisa melakukan `infer` terhadap tipe data yang dibutuhkan secara otomatis, dan ter-cover disini.
+
+Keren yah !

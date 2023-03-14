@@ -9,6 +9,10 @@ import BaseLayout from "../layouts/BaseLayout";
 import FormPage from "../pages/FormPage";
 import TablePage from "../pages/TablePage";
 
+// TODO: counterPage - Create Counter Page (1)
+// Di sini kita akan import CounterPage yang barusan dibuat
+import CounterPage from "../pages/CounterPage";
+
 // Karena ini akan di-infer (ditebak) secara otomatis, kita tidak perlu menuliskan tipe datanya
 
 // Hanya saja sebagai info router tipe datanya adalah "Router" / "RemixRouter"
@@ -41,6 +45,12 @@ const router = createBrowserRouter([
       {
         path: "table",
         element: <TablePage />,
+      },
+      // TODO: counterPage - Create Counter Page (2)
+      // Tambahkan path di sini
+      {
+        path: "counter",
+        element: <CounterPage />,
       },
     ],
   },
