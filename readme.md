@@ -8,6 +8,7 @@
   - [Langkah 1 - Instalasi dan Inisialisasi React Router pada Project](#langkah-1---instalasi-dan-inisialisasi-react-router-pada-project)
   - [Langkah 2 - Ekstrak Layout Utama](#langkah-2---ekstrak-layout-utama)
   - [Langkah 3 - Membuat Counter Page](#langkah-3---membuat-counter-page)
+  - [Langkah 4 - Menggunakan loader dari Data API](#langkah-4---menggunakan-loader-dari-data-api)
 
 ## Disclaimer & Prerequisites
 
@@ -470,3 +471,237 @@ Dan apakah kalian sadar? Dari tadi, kita sudah menggunakan React Router, versi T
 Hal ini bisa dilakukan karena sekali lagi, TypeScript bisa melakukan `infer` terhadap tipe data yang dibutuhkan secara otomatis, dan ter-cover disini.
 
 Keren yah !
+
+Selanjutnya mari kita mencoba untuk menggunakan Loader yang dimiliki oleh React Router yah.
+
+## Langkah 4 - Menggunakan loader dari Data API
+
+Pada langkah ini kita akan mencoba untuk menggunakan `loader` dari React Router untuk bisa mendapatkan data **SEBELUM** component-nya akan di-render pada halaman `TablePage.tsx`
+
+`loader` adalah sebuah API bawaan dari React Router apabila kita menggunakan cara penulisan router yang baru yang bernama Data APIs
+
+Dokumentasi:
+
+- https://reactrouter.com/en/main/routers/picking-a-router
+- https://reactrouter.com/en/main/route/loader
+- https://reactrouter.com/en/main/hooks/use-loader-data
+
+Langkah langkahnya adalah sebagai berikut:
+
+1. Membuat sebuah file baru dengan nama `/src/schemas/comment.ts` dan memindahkan `type Comment` dari `/src/pages/TablePage.tsx` ke `comment.ts`.
+
+   Adapun kode pada `comment.ts` adalah sebagai berikut:
+
+   ```ts
+   // Export type Comment
+   // Mengapa?
+   // Karena type Comment ini akan digunakan di router/index.tsx dan pages/TablePage.tsx
+   export type Comment = {
+     id: number;
+     email: string;
+     body: string;
+   };
+   ```
+
+1. Menggunakan Loader pada `/routers/index.tsx`
+
+   ```tsx
+   import { createBrowserRouter } from "react-router-dom";
+   import BaseLayout from "../layouts/BaseLayout";
+   import FormPage from "../pages/FormPage";
+   import TablePage from "../pages/TablePage";
+   import CounterPage from "../pages/CounterPage";
+
+   // TODO: loader - Menggunakan loader di router/index.tsx (1)
+   // Import type Comment
+   import { type Comment } from "../schemas/comment";
+
+   const router = createBrowserRouter([
+     {
+       element: <BaseLayout />,
+       // TODO: loader - Menggunakan loader di router/index.tsx (2)
+       // Sekarang di sini kita akan menggunakan custom errorElement (apabila terjadi error)
+       // Error yang dimaksud adalah di luar error route not found
+       // Dokumentasi: https://reactrouter.com/en/main/route/error-element
+       errorElement: <h1>Terjadi sebuah error</h1>,
+       children: [
+         {
+           path: "form",
+           element: <FormPage />,
+         },
+         {
+           path: "table",
+           element: <TablePage />,
+           // TODO: loader - Menggunakan loader di router/index.tsx (3)
+           // Karena di sini kita akan mengambil data terlebih dahulu sebelum page dirender
+           // kita akan menggunakan loader
+
+           // loader ini akan menerima sebuah fungsi, yang mana bisa dituliskan secara async / await
+           // apabila membutuhkan async / await (seperti fetch)
+
+           // Di sini sebenarnya secara default typescript bisa melakukan infer bahwa tipe data
+           // dari request adalah Request
+
+           // tipe data Request adalah bawaan untuk semua web (stanadard data type)
+           // untuk spec request bisa dibaca di https://developer.mozilla.org/en-US/docs/Web/API/Request
+
+           // Untuk pembelajaran kita akan mencoba untuk melakukan definisi tipe data secara manual
+           // (Perhatikan) ": { request: Request }"
+           loader: async ({ request }: { request: Request }) => {
+             console.log(request);
+
+             // TODO: loader - Menggunakan loader di router/index.tsx (4)
+             // Kita akan memindahkan isi dari useEffect dari TablePage.tsx ke dalam sini
+             try {
+               const response = await fetch(
+                 "https://jsonplaceholder.typicode.com/commentssss"
+               );
+
+               if (!response.ok) {
+                 const body = await response.text();
+                 throw new Error(body);
+               }
+
+               const responseJson: Comment[] = await response.json();
+
+               // TODO: loader - Menggunakan loader di router/index.tsx (5)
+               // Di sini kita tidak boleh menggunakan state
+               // setComments(responseJson);
+
+               // TODO: loader - Menggunakan loader di router/index.tsx (6)
+               // Melainkan kita akan return hasilnya
+               return responseJson;
+
+               // Apabila tidak ada apapun yang dikembalikan
+               // Wajib return null
+             } catch (err) {
+               if (typeof err === "string") {
+                 console.log(err);
+               }
+
+               // Karena ini dari error, kita tidak wajib mengembalikan apapun ke sini
+             }
+           },
+         },
+         {
+           path: "counter",
+           element: <CounterPage />,
+         },
+       ],
+     },
+     {
+       path: "*",
+       element: <h1>Not Found Oi !</h1>,
+     },
+   ]);
+
+   export default router;
+   ```
+
+1. Menggunakan useLoaderData pada `/src/pages/TablePage.tsx`.
+
+   ```tsx
+   // TODO: loader - Menggunakan useLoaderData (1)
+   // Comment useEffect dan useState, sudah tidak dibutuhkan
+   // import { useEffect, useState } from "react";
+
+   // TODO: loader - Menggunakan useLoaderData (2)
+   // import type Comment dan useLoaderData
+   import { type Comment } from "../schemas/comment";
+   import { useLoaderData } from "react-router-dom";
+
+   const TablePage = () => {
+     // TODO: loader - Menggunakan useLoaderData (3)
+     // comment useState karena tidak digunakan lagi
+     // const [comments, setComments] = useState<Comment[]>([]);
+
+     // TODO: loader - Menggunakan useLoaderData (5)
+     // Menggunakan useLoaderData
+
+     // Karena useLoaderData akan mengembalikan tipe data "unknown",
+     // kita tidak bisa langsung mengubah tipe data
+     // di sebelah kirinya dengan cara
+     // const comments: Comment[]
+
+     // Tapi kita harus meminta agar useLoaderData() memiliki tipe data kembalian adalah Comment[]
+     // sehingga di sini kita menggunakan
+     // useLoaderData() as Comment[]
+
+     // Dan karena nanti ini bisa diubah (di filter)
+     // Maka kita akan menggunakan let, bukan const
+     let comments = useLoaderData() as Comment[];
+
+     // TODO: loader - Menggunakan useLoaderData (4)
+     // Comment useEffect karena sudah tidak digunakan lagi
+     // useEffect(() => {
+     //   (async () => {
+     //     try {
+     //       const response = await fetch(
+     //         "https://jsonplaceholder.typicode.com/comments"
+     //       );
+
+     //       if (!response.ok) {
+     //         const body = await response.text();
+     //         throw new Error(body);
+     //       }
+
+     //       const responseJson: Comment[] = await response.json();
+
+     //       setComments(responseJson);
+     //     } catch (err) {
+     //       if (typeof err === "string") {
+     //         console.log(err);
+     //       }
+     //     }
+     //   })();
+     // }, []);
+
+     // TODO: loader - Menggunakan useLoaderData (6)
+     // Modifikasi setComments dari useState
+     // langsung melakukan assignment terhadap comments
+     const eachRowButtonDeleteOnClickHandler = (data: Comment) => {
+       let filteredComments = comments.filter(
+         (comment) => comment.id !== data.id
+       );
+       // setComments(filteredComments);
+       comments = filteredComments;
+     };
+
+     return (
+       <>
+         <p>Ini adalah halaman Table</p>
+
+         <table>
+           <thead>
+             <tr>
+               <th>Id</th>
+               <th>Email</th>
+               <th>Body</th>
+               <th>Action</th>
+             </tr>
+           </thead>
+           <tbody>
+             {comments.map((comment) => (
+               <tr key={comment.id}>
+                 <td>{comment.id}</td>
+                 <td>{comment.email}</td>
+                 <td>{comment.body}</td>
+                 <td>
+                   <button
+                     onClick={() => eachRowButtonDeleteOnClickHandler(comment)}
+                   >
+                     Delete
+                   </button>
+                 </td>
+               </tr>
+             ))}
+           </tbody>
+         </table>
+       </>
+     );
+   };
+
+   export default TablePage;
+   ```
+
+Dan selesai sudah penggunaan loader Data API pada aplikasi yang dibuat, mantap !
