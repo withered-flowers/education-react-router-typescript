@@ -17,6 +17,10 @@ import CounterPage from "../pages/CounterPage";
 // Import type Comment
 import { type Comment } from "../schemas/comment";
 
+// TODO: tableDetailPage - Menggunakan params (9)
+// Import CommentDetailPage
+import CommentDetailPage from "../pages/CommentDetailPage";
+
 // Karena ini akan di-infer (ditebak) secara otomatis, kita tidak perlu menuliskan tipe datanya
 
 // Hanya saja sebagai info router tipe datanya adalah "Router" / "RemixRouter"
@@ -76,7 +80,7 @@ const router = createBrowserRouter([
           // Kita akan memindahkan isi dari useEffect dari TablePage.tsx ke dalam sini
           try {
             const response = await fetch(
-              "https://jsonplaceholder.typicode.com/commentssss"
+              "https://jsonplaceholder.typicode.com/comments"
             );
 
             if (!response.ok) {
@@ -104,6 +108,23 @@ const router = createBrowserRouter([
             // Karena ini dari error, kita tidak wajib mengembalikan apapun ke sini
           }
         },
+
+        // TODO: tableDetailPage - Menggunakan params (10)
+        // Tambahkan children disini
+        children: [
+          {
+            // TODO: tableDetailPage - Menggunakan params (11)
+            // Di sini kita akan menggunakan path children yang menggunakan prefix titik dua (:)
+            // dilanjutkan dengan nama parameter dinamis yang akan digunakan
+
+            // Di bawah sini kita menggunakan :id <--- nama parameternya adalah id
+
+            // Sebagai catatan, path ini akan diambil dan diproses dalam bentuk "string"
+            // sekalipun yang akan diinput adalah sebuah angka
+            path: ":id",
+            element: <CommentDetailPage />,
+          },
+        ],
       },
       // TODO: counterPage - Create Counter Page (2)
       // Tambahkan path di sini
