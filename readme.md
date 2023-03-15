@@ -705,3 +705,9 @@ Langkah langkahnya adalah sebagai berikut:
    ```
 
 Dan selesai sudah penggunaan loader Data API pada aplikasi yang dibuat, mantap !
+
+Jadi pada pembelajaran ini kita sudah belajar untuk menggunakan React Router secara TypeScript yang mana, ternyata, tidak berbeda banyak dengan versi JavaScript-nya yah.
+
+(Kecuali memang kita ingin mendefinisikan data yang ada dengan sangat detail)
+
+Tetap semangat belajar React-nya yah !
