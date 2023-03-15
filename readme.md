@@ -3,13 +3,13 @@
 ## Table of Content
 
 - [Disclaimer & Prerequisites](#disclaimer--prerequisites)
-- Intro
+- [Intro](#intro)
 - [Let's Learn](#lets-learn)
   - [Langkah 1 - Instalasi dan Inisialisasi React Router pada Project](#langkah-1---instalasi-dan-inisialisasi-react-router-pada-project)
   - [Langkah 2 - Ekstrak Layout Utama](#langkah-2---ekstrak-layout-utama)
   - [Langkah 3 - Membuat Counter Page](#langkah-3---membuat-counter-page)
   - [Langkah 4 - Menggunakan loader dari Data API](#langkah-4---menggunakan-loader-dari-data-api)
-  - [Langkah 5 - Menggunakan params]
+  - [Langkah 5 - Menggunakan params](#langkah-5---menggunakan-params)
 
 ## Disclaimer & Prerequisites
 
