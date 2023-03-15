@@ -9,6 +9,7 @@
   - [Langkah 2 - Ekstrak Layout Utama](#langkah-2---ekstrak-layout-utama)
   - [Langkah 3 - Membuat Counter Page](#langkah-3---membuat-counter-page)
   - [Langkah 4 - Menggunakan loader dari Data API](#langkah-4---menggunakan-loader-dari-data-api)
+  - [Langkah 5 - Menggunakan params]
 
 ## Disclaimer & Prerequisites
 
@@ -705,6 +706,286 @@ Langkah langkahnya adalah sebagai berikut:
    ```
 
 Dan selesai sudah penggunaan loader Data API pada aplikasi yang dibuat, mantap !
+
+## Langkah 5 - Menggunakan params
+
+Selanjutnya kita akan mencoba untuk menggunakan params pada React Router ini.
+
+Requirementnya adalah:
+
+- Halaman Detail akan tampil ketika tombol `Detail` pada halaman `TablePage.tsx` ditekan. tombol `Detail` dibuat di sebelah / di atas tombol `Delete`
+- Endpoint yang digunakan adalah `/table/idCommentYangDipilih`.
+
+  Contoh: `/table/1` akan mengarah pada `Comment` dengan id 1
+
+- Nama Page yang dibuat adalah `CommentDetailPage.tsx`
+
+Langkah pengerjaannya adalah sebagai berikut:
+
+1. Membuat pages baru dengan nama `/src/pages/CommentDetailPage.tsx`
+1. Menambahkan kode sebagai berikut:
+
+   ```ts
+   // TODO: tableDetailPage - Menggunakan params (1)
+   // Membuat halaman CommentDetailPage.tsx
+
+   // TODO: tableDetailPage - Menggunakan params (2)
+   // Di sini kita akan import semua yang dibutuhkan
+   import { useEffect, useState } from "react";
+   import { useParams } from "react-router-dom";
+   // Perhatikan di sini kita menggunakan Comment lagi di sini
+   import { Comment } from "../schemas/comment";
+
+   // TODO: tableDetailPage - Menggunakan params (3)
+   // Karena di sini kita sudah akan menggunakan seluruh data dari Comment, dan type Comment tidak memiliki seluruh data yang ada, maka kita akan membuat type yang baru dengan nama CommentDetail
+
+   // Nah karena Comment Detail ini sebenarnya menggunakan isi yang sama dengan Comment
+   // dan ditambahkan dengan postId dan name, maka di sini kita bisa "extend" type
+   // dengan menggunakan lambang "&"
+   type CommentDetail = Comment & {
+     postId: number;
+     name: string;
+   };
+
+   const CommentDetailPage = () => {
+     // TODO: tableDetailPage - Menggunakan params (4)
+     // Pada halaman ini kita akan mencoba kembali untuk menggunakan useEffect
+     // Supaya kita dapat mengetahui: "Apakah loader dari Data API bisa digabungkan dengan useEffect?"
+
+     // Untuk bisa menggunakan params, kita hanya perlu menggunakan useParams
+     // Dan secara otomatis akan diambil string yang paling pasnya untuk halaman Page ini
+
+     // Karena page ini dipanggil dari path `/comment/:id`
+     // maka secara otomatis paramsnya akan mengarah ke :id <--- string
+     const { id } = useParams();
+
+     // Secara otomatis, pada bagian ini, akan diinfer bahwa commentDetail
+     // bisa berupa sebuah Object ATAU undefined
+
+     // Kalau sebelumnya, pada saat menggunakan array, kita bisa menggunakan array kosong saja
+     // namun pada saat Object, kita tidak bisa menggunakan Object kosongan saja
+     const [commentDetail, setCommentDetail] = useState<CommentDetail>();
+
+     useEffect(
+       () => {
+         (async () => {
+           try {
+             const response = await fetch(
+               `https://jsonplaceholder.typicode.com/comments/${id}`
+             );
+
+             if (!response.ok) {
+               throw new Error("Terjadi sebuah error !");
+             }
+
+             const responseJson: CommentDetail = await response.json();
+             setCommentDetail(responseJson);
+           } catch (err) {
+             // Karena yang di throw di atas berupa error, maka kita harus mengecek
+             // apakah typeof err adalah Error
+
+             // Namun typeof tidak bisa mengecek apakah sebuah error itu merupakan
+             // "class Error" atau bukan
+
+             // Maka di sini kita tidak menggunakan typeof melainkan instanceof
+             if (err instanceof Error) {
+               console.log(err.message);
+             }
+           }
+         })();
+       },
+       // Jangan lupa karena effect ini bergantung dari params, dimasukkan ke dalam deps list
+       [id]
+     );
+
+     return (
+       <>
+         {/* // TODO: tableDetailPage - Menggunakan params (5) */}
+         {/* // Menampilkan data nya di sini */}
+         {/* // Ingat, karena commentDetail bisa undefined, maka harus di-optional-chaining-kan (?) */}
+         <p>Id: {commentDetail?.id}</p>
+         <p>PostId: {commentDetail?.postId}</p>
+         <p>Name: {commentDetail?.name}</p>
+         <p>Email: {commentDetail?.email}</p>
+         <p>Body: {commentDetail?.body}</p>
+       </>
+     );
+   };
+
+   export default CommentDetailPage;
+   ```
+
+   Perhatikan baik baik pada tipe data `CommentDetail` yang dibuat yah !
+
+1. Memodifikasi page `/src/pages/TablePage.jsx` untuk:
+
+   - Menambahkan `useNavigate` (hooks yang digunakan untuk berpindah page)
+   - Menambahkan `Outlet` (untuk menambahkan )
+   - Menambahkan button dan handler untuk `Detail` (pindah ke halaman detail)
+
+   Adapun modifikasi kodenya adalah sebagai berikut:
+
+   ```tsx
+   import { type Comment } from "../schemas/comment";
+   import { useLoaderData } from "react-router-dom";
+
+   import { Outlet, useNavigate } from "react-router-dom";
+
+   const TablePage = () => {
+     let comments = useLoaderData() as Comment[];
+
+     const eachRowButtonDeleteOnClickHandler = (data: Comment) => {
+       let filteredComments = comments.filter(
+         (comment) => comment.id !== data.id
+       );
+       // setComments(filteredComments);
+       comments = filteredComments;
+     };
+
+     // TODO: tableDetailPage - Menggunakan params (8)
+     // Menambahkan handler untuk berpindah halaman
+     // Di sini juga kita akan menggunakan hooks useNavigate
+     const navigate = useNavigate();
+     const eachRowButtonDetailOnClickHandler = (data: Comment) => {
+       navigate(`/table/${data.id}`);
+     };
+
+     return (
+       <>
+         <p>Ini adalah halaman Table</p>
+
+         {/* // TODO: tableDetailPage - Menggunakan params (7) */}
+         {/* // Menambahkan Outlet */}
+         <Outlet />
+
+         <table>
+           <thead>
+             <tr>
+               <th>Id</th>
+               <th>Email</th>
+               <th>Body</th>
+               <th>Action</th>
+             </tr>
+           </thead>
+           <tbody>
+             {comments.map((comment) => (
+               <tr key={comment.id}>
+                 <td>{comment.id}</td>
+                 <td>{comment.email}</td>
+                 <td>{comment.body}</td>
+                 <td>
+                   {/* // TODO: tableDetailPage - Menggunakan params (7) */}
+                   {/* // Menambahkan Detail button */}
+                   <button
+                     onClick={() => eachRowButtonDetailOnClickHandler(comment)}
+                   >
+                     Detail
+                   </button>
+                   <button
+                     onClick={() => eachRowButtonDeleteOnClickHandler(comment)}
+                   >
+                     Delete
+                   </button>
+                 </td>
+               </tr>
+             ))}
+           </tbody>
+         </table>
+       </>
+     );
+   };
+
+   export default TablePage;
+   ```
+
+1. Memodifikasi halaman `/src/routers/index.tsx` untuk bisa menggunakan endpoint `/table/:id`. Adapun modifikasi kodenya adalah sebagai berikut:
+
+   ```tsx
+   import { createBrowserRouter } from "react-router-dom";
+   import BaseLayout from "../layouts/BaseLayout";
+   import FormPage from "../pages/FormPage";
+   import TablePage from "../pages/TablePage";
+
+   import CounterPage from "../pages/CounterPage";
+
+   import { type Comment } from "../schemas/comment";
+
+   // TODO: tableDetailPage - Menggunakan params (9)
+   // Import CommentDetailPage
+   import CommentDetailPage from "../pages/CommentDetailPage";
+
+   const router = createBrowserRouter([
+     {
+       element: <BaseLayout />,
+       errorElement: <h1>Terjadi sebuah error</h1>,
+       children: [
+         {
+           path: "form",
+           element: <FormPage />,
+         },
+         {
+           path: "table",
+           element: <TablePage />,
+           loader: async ({ request }: { request: Request }) => {
+             console.log(request);
+
+             try {
+               const response = await fetch(
+                 "https://jsonplaceholder.typicode.com/comments"
+               );
+
+               if (!response.ok) {
+                 const body = await response.text();
+                 throw new Error(body);
+               }
+
+               const responseJson: Comment[] = await response.json();
+               return responseJson;
+
+               // Apabila tidak ada apapun yang dikembalikan
+               // Wajib return null
+             } catch (err) {
+               if (typeof err === "string") {
+                 console.log(err);
+               }
+             }
+           },
+
+           // TODO: tableDetailPage - Menggunakan params (10)
+           // Tambahkan children disini
+           children: [
+             {
+               // TODO: tableDetailPage - Menggunakan params (11)
+               // Di sini kita akan menggunakan path children yang menggunakan prefix titik dua (:)
+               // dilanjutkan dengan nama parameter dinamis yang akan digunakan
+
+               // Di bawah sini kita menggunakan :id <--- nama parameternya adalah id
+
+               // Sebagai catatan, path ini akan diambil dan diproses dalam bentuk "string"
+               // sekalipun yang akan diinput adalah sebuah angka
+               path: ":id",
+               element: <CommentDetailPage />,
+             },
+           ],
+         },
+         {
+           path: "counter",
+           element: <CounterPage />,
+         },
+       ],
+     },
+     {
+       path: "*",
+       element: <h1>Not Found Oi !</h1>,
+     },
+   ]);
+
+   export default router;
+   ```
+
+Dan sampai di sini seharusnya sudah selesai untuk menambahkan penggunaan params pada router yang digunakan.
+
+Cukup sedikit yah TypeScript yang digunakan !
 
 Jadi pada pembelajaran ini kita sudah belajar untuk menggunakan React Router secara TypeScript yang mana, ternyata, tidak berbeda banyak dengan versi JavaScript-nya yah.
 

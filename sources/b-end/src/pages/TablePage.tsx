@@ -7,6 +7,11 @@
 import { type Comment } from "../schemas/comment";
 import { useLoaderData } from "react-router-dom";
 
+// TODO: tableDetailPage - Menggunakan params (6)
+// Di sini kita harus menggunakan Outlet untuk menampilkan detail pada halaman TablePage ini
+// Sekaligus kita harus menggunakan hooks useNavigate untuk bisa berpindah halaman
+import { Outlet, useNavigate } from "react-router-dom";
+
 const TablePage = () => {
   // TODO: loader - Menggunakan useLoaderData (3)
   // comment useState karena tidak digunakan lagi
@@ -62,9 +67,21 @@ const TablePage = () => {
     comments = filteredComments;
   };
 
+  // TODO: tableDetailPage - Menggunakan params (8)
+  // Menambahkan handler untuk berpindah halaman
+  // Di sini juga kita akan menggunakan hooks useNavigate
+  const navigate = useNavigate();
+  const eachRowButtonDetailOnClickHandler = (data: Comment) => {
+    navigate(`/table/${data.id}`);
+  };
+
   return (
     <>
       <p>Ini adalah halaman Table</p>
+
+      {/* // TODO: tableDetailPage - Menggunakan params (7) */}
+      {/* // Menambahkan Outlet */}
+      <Outlet />
 
       <table>
         <thead>
@@ -82,6 +99,13 @@ const TablePage = () => {
               <td>{comment.email}</td>
               <td>{comment.body}</td>
               <td>
+                {/* // TODO: tableDetailPage - Menggunakan params (7) */}
+                {/* // Menambahkan Detail button */}
+                <button
+                  onClick={() => eachRowButtonDetailOnClickHandler(comment)}
+                >
+                  Detail
+                </button>
                 <button
                   onClick={() => eachRowButtonDeleteOnClickHandler(comment)}
                 >
