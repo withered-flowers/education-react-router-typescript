@@ -64,6 +64,26 @@ const TablePage = () => {
   const eachRowButtonDeleteOnClickHandler = (data: Comment) => {
     let filteredComments = comments.filter((comment) => comment.id !== data.id);
     // setComments(filteredComments);
+
+    // DISCLAIMER:
+    // Kode di bawah ini TIDAK AKAN berjalan
+
+    // kenapa demikian?
+    // kembalian dari useLoaderData() BUKAN sebuah state yang reaktif, sehingga kode ini walaupun isinya berubah, tidak akan men-trigger re-render !
+    // 2. Apabila ini benar benar ingin dibuat reaktif, maka useLoaderData tersebut harus dimasukkan ke dalam sebuah state, kemudian menggunakan useEffect() untuk re-fetch data
+
+    /*
+      const comments = useLoaderData as Comment[];
+      const [stateComments, setStateComments) = useState<Comment[]>(comments);
+
+      useEffect(() => {
+        (async () => {
+          // Panggil trigger refetch di sini
+        })
+      }, [comments])
+    */
+
+    // 3. Pada pembelajaran ini, sekalipun statenya diubah, useEffect mentrigger re-fetch data, data akan kembali ke semula, karena tidak memiliki database !
     comments = filteredComments;
   };
 
