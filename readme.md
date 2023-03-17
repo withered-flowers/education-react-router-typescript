@@ -43,7 +43,7 @@ Pada pembelajaran kali ini, kita akan mencoba untuk menggunakan React Router ver
    - [yarn] yarn add
    - [pnpm] pnpm install
 
-1. Menambahkan package `react-router`dom` dengan menggunakan perintah:
+1. Menambahkan package `react-router-dom` dengan menggunakan perintah:
 
    - [npm] npm install react-router-dom
    - [yarn] yarn add react-router-dom
